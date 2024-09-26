@@ -21,12 +21,12 @@ var (
 type Metadata map[string]interface{}
 
 type APIV1Response struct {
-	Version int         `json:"version"`
-	Success bool        `json:"success"`
-	Msg     string      `json:"msg"`
-	Code    int         `json:"code"`
-	Err     string      `json:"err"`
-	Data    interface{} `json:"data"`
+	Version int         `json:"version,omitempty"`
+	Success bool        `json:"success,omitempty"`
+	Msg     string      `json:"msg,omitempty"`
+	Code    int         `json:"code,omitempty"`
+	Err     string      `json:"err,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 /**
@@ -34,22 +34,22 @@ type APIV1Response struct {
  */
 
 type User struct {
-	UserID      int       `json:"user_id"`
-	Username    string    `json:"username"`
-	Email       string    `json:"email"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	Gender      string    `json:"gender"`
-	Avatar      string    `json:"avatar"`
-	Phone       string    `json:"phone"`
-	Address     string    `json:"address"`
-	Country     string    `json:"country"`
-	ZipCode     string    `json:"zip_code"`
-	DateOfBirth time.Time `json:"date_of_birth"`
-	Roles       int       `json:"roles"`
-	Metadata    Metadata  `json:"metadata"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	JoinedAt    time.Time `json:"joined_at"`
+	UserID      int       `json:"user_id,omitempty"`
+	Username    string    `json:"username,omitempty"`
+	Email       string    `json:"email,omitempty"`
+	FirstName   string    `json:"first_name,omitempty"`
+	LastName    string    `json:"last_name,omitempty"`
+	Gender      string    `json:"gender,omitempty"`
+	Avatar      string    `json:"avatar,omitempty"`
+	Phone       string    `json:"phone,omitempty"`
+	Address     string    `json:"address,omitempty"`
+	Country     string    `json:"country,omitempty"`
+	ZipCode     string    `json:"zip_code,omitempty"`
+	DateOfBirth time.Time `json:"date_of_birth,omitempty"`
+	Roles       int       `json:"roles,omitempty"`
+	Metadata    Metadata  `json:"metadata,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`
+	JoinedAt    time.Time `json:"joined_at,omitempty"`
 }
 
 /**
@@ -57,16 +57,16 @@ type User struct {
  */
 
 type SessionCreds struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 type SessionData struct {
-	Token    string    `json:"token"`
-	IssuedAt time.Time `json:"issuedAt"`
-	Subject  int       `json:"subject"`
-	Expiry   time.Time `json:"expiry"`
-	User     User      `json:"user"`
+	Token    string    `json:"token,omitempty"`
+	IssuedAt time.Time `json:"issuedAt,omitempty"`
+	Subject  int       `json:"subject,omitempty"`
+	Expiry   time.Time `json:"expiry,omitempty"`
+	User     User      `json:"user,omitempty"`
 }
 
 /**
@@ -91,13 +91,13 @@ func (b Buckets) Swap(i, j int) {
 }
 
 type Bucket struct {
-	BucketID  int       `json:"bucket_id"`
-	Alias     string    `json:"alias"`
-	OwnerID   int       `json:"owner_id"`
-	IsPublic  bool      `json:"is_public"`
-	Metadata  Metadata  `json:"metadata"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CreatedAt time.Time `json:"created_at"`
+	BucketID  int       `json:"bucket_id,omitempty"`
+	Alias     string    `json:"alias,omitempty"`
+	OwnerID   int       `json:"owner_id,omitempty"`
+	IsPublic  bool      `json:"is_public,omitempty"`
+	Metadata  Metadata  `json:"metadata,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 /**
@@ -105,16 +105,16 @@ type Bucket struct {
  */
 
 type Object struct {
-	ObjectID       int       `json:"object_id"`
-	Alias          string    `json:"alias"`
-	ParentID       int       `json:"parent_id"`
-	IsPublic       bool      `json:"is_public"`
-	ContentType    string    `json:"content_type"`
-	SQLContentType string    `json:"sql_content_type"`
-	ContentLength  int       `json:"content_length"`
-	Metadata       Metadata  `json:"metadata"`
-	UpdatedAt      time.Time `json:"updated_at"`
-	CreatedAt      time.Time `json:"created_at"`
+	ObjectID       int       `json:"object_id,omitempty"`
+	Alias          string    `json:"alias,omitempty"`
+	ParentID       int       `json:"parent_id,omitempty"`
+	IsPublic       bool      `json:"is_public,omitempty"`
+	ContentType    string    `json:"content_type,omitempty"`
+	SQLContentType string    `json:"sql_content_type,omitempty"`
+	ContentLength  int       `json:"content_length,omitempty"`
+	Metadata       Metadata  `json:"metadata,omitempty"`
+	UpdatedAt      time.Time `json:"updated_at,omitempty"`
+	CreatedAt      time.Time `json:"created_at,omitempty"`
 }
 
 type Objects []Object
