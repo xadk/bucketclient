@@ -266,22 +266,8 @@ func (db *BucketDB) GetMyBucket(query string) (*Bucket, error) {
 	return &bucket, json.Unmarshal(data, &bucket)
 }
 
-func (db *BucketDB) GetMyBuckets(params url.Values) (*[]Bucket, error) {
-	var buckets []Bucket
-	var q string
-	if qe := params.Encode(); qe != "" {
-		q += "?" + qe
-	}
-
-	data, err := db.apiV1Request(METHOD_GET,
-		fmt.Sprintf("/api/v1/buckets/%s"+q, db.username),
-		nil,
-		nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &buckets, json.Unmarshal(data, &buckets)
+func (db *BucketDB) GetMyBuckets(params url.Values) Seekable[Buckets] {
+	return newSeekable[Buckets](db, fmt.Sprintf("/api/v1/buckets/%s", db.username), params)
 }
 
 func (db *BucketDB) GetPublicBucket(userQuery, query string) (*Bucket, error) {
@@ -296,22 +282,8 @@ func (db *BucketDB) GetPublicBucket(userQuery, query string) (*Bucket, error) {
 	return &bucket, json.Unmarshal(data, &bucket)
 }
 
-func (db *BucketDB) GetPublicBuckets(userQuery string, params url.Values) (*[]Bucket, error) {
-	var buckets []Bucket
-	var q string
-	if qe := params.Encode(); qe != "" {
-		q += "?" + qe
-	}
-
-	data, err := db.apiV1Request(METHOD_GET,
-		fmt.Sprintf("/api/v1/buckets/%s"+q, userQuery),
-		nil,
-		nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &buckets, json.Unmarshal(data, &buckets)
+func (db *BucketDB) GetPublicBuckets(userQuery string, params url.Values) Seekable[Buckets] {
+	return newSeekable[Buckets](db, fmt.Sprintf("/api/v1/buckets/%s", userQuery), params)
 }
 
 func (db *BucketDB) UpdateBucket(query string, newBucket Bucket) (*Bucket, error) {
@@ -375,21 +347,8 @@ func (db *BucketDB) GetMyObject(bucketQuery, objQuery string) (*Object, error) {
 	return &obj, json.Unmarshal(data, &obj)
 }
 
-func (db *BucketDB) GetMyObjects(bucketQuery string, params url.Values) (*[]Object, error) {
-	var objects []Object
-	var q string
-	if qe := params.Encode(); qe != "" {
-		q += "?" + qe
-	}
-	data, err := db.apiV1Request(METHOD_GET,
-		fmt.Sprintf("/api/v1/objects/%s"+q, bucketQuery),
-		nil,
-		nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &objects, json.Unmarshal(data, &objects)
+func (db *BucketDB) GetMyObjects(bucketQuery string, params url.Values) Seekable[Objects] {
+	return newSeekable[Objects](db, fmt.Sprintf("/api/v1/objects/%s", bucketQuery), params)
 }
 
 func (db *BucketDB) GetPublicObject(userQuery, bucketQuery, objQuery string) (*Object, error) {
@@ -404,22 +363,8 @@ func (db *BucketDB) GetPublicObject(userQuery, bucketQuery, objQuery string) (*O
 	return &obj, json.Unmarshal(data, &obj)
 }
 
-func (db *BucketDB) GetPublicObjects(userQuery, bucketQuery string, params url.Values) (*[]Object, error) {
-	var objects []Object
-	var q string
-	if qe := params.Encode(); qe != "" {
-		q += "?" + qe
-	}
-
-	data, err := db.apiV1Request(METHOD_GET,
-		fmt.Sprintf("/api/v1/objects/%s/%s"+q, userQuery, bucketQuery),
-		nil,
-		nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &objects, json.Unmarshal(data, &objects)
+func (db *BucketDB) GetPublicObjects(userQuery, bucketQuery string, params url.Values) Seekable[Objects] {
+	return newSeekable[Objects](db, fmt.Sprintf("/api/v1/objects/%s/%s", userQuery, bucketQuery), params)
 }
 
 func (db *BucketDB) UpdateObject(bucketQuery, objQuery string, newObj Object) (*Object, error) {
@@ -486,7 +431,10 @@ func (db *BucketDB) FetchPublicObjectContent(userQuery, bucketQuery, objQuery st
 	}
 
 	// Headers
-	req.Header.Set("Authorization", "Bearer "+db.session.Token)
+	if db.session.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+db.session.Token)
+	}
+
 	// Response
 	resp, err := client.Do(req)
 	if err != nil {
