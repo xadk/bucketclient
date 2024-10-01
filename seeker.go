@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
+	"time"
 )
 
 type Seekables interface {
@@ -15,6 +16,8 @@ type Seekables interface {
 // Seekable interface to control seeking and caching
 type Seekable[T Seekables] interface {
 	SetParams(params url.Values)
+	GetLastAccessed() time.Time
+	GetLastFetched() time.Time
 	GetCache() map[int]T
 	GetOffset() int
 	GetLimit() int
@@ -27,17 +30,27 @@ type Seekable[T Seekables] interface {
 
 // Seeker struct to hold seeking parameters and data
 type seeker[T Seekables] struct {
-	db       *BucketDB
-	limit    int
-	offset   int
-	cache    map[int]T
-	endpoint string
-	params   url.Values
-	mu       sync.Mutex
+	db           *BucketDB
+	lastAccessed time.Time
+	lastFetched  time.Time
+	limit        int
+	offset       int
+	cache        map[int]T
+	endpoint     string
+	params       url.Values
+	mu           sync.Mutex
 }
 
 func (s *seeker[T]) SetParams(params url.Values) {
 	s.params = params
+}
+
+func (s *seeker[T]) GetLastAccessed() time.Time {
+	return s.lastAccessed
+}
+
+func (s *seeker[T]) GetLastFetched() time.Time {
+	return s.lastFetched
 }
 
 func (s *seeker[T]) GetCache() map[int]T {
@@ -82,6 +95,7 @@ func (s *seeker[T]) Next() (T, error) {
 
 // GetData returns the cached data or calls Next
 func (s *seeker[T]) GetData() (T, error) {
+	s.lastAccessed = time.Now()
 	s.mu.Lock()
 	if data, ok := s.cache[s.offset]; ok { // Includes potentially partial data
 		s.mu.Unlock() // Must unlock
@@ -95,6 +109,7 @@ func (s *seeker[T]) GetData() (T, error) {
 // loadData fetches the data from the API and caches it
 func (s *seeker[T]) loadData() (T, error) {
 	var result T
+	s.lastFetched = time.Now()
 
 	var params = url.Values{}
 	if s.params != nil {
