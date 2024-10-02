@@ -2,7 +2,6 @@ package bucketclient
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"sync"
@@ -85,10 +84,7 @@ func (s *seeker[T]) Next() (T, error) {
 		return data, err
 	}
 
-	if len(data) < 1 { // Empty data without the error(s)
-		return data, errors.New("no more data to load")
-	}
-
+	// If data is empty, then += 0 anyway
 	s.offset += len(data) // Seek to the data end
 	return data, err
 }
