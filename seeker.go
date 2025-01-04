@@ -17,12 +17,13 @@ type Seekable[T Seekables] interface {
 	SetParams(params url.Values)
 	GetLastAccessed() time.Time
 	GetLastFetched() time.Time
-	GetCache() map[int]T
+	GetCache() *map[int]T
 	GetOffset() int
 	GetLimit() int
 	Seek(offset int)
 	Clear()
 	SetLimit(limit int)
+	IsBuffered() bool
 	Next() (T, error)
 	GetData() (T, error)
 }
@@ -37,6 +38,7 @@ type seeker[T Seekables] struct {
 	cache        map[int]T
 	endpoint     string
 	params       url.Values
+	isBuffered   bool
 	mu           sync.Mutex
 }
 
@@ -52,8 +54,8 @@ func (s *seeker[T]) GetLastFetched() time.Time {
 	return s.lastFetched
 }
 
-func (s *seeker[T]) GetCache() map[int]T {
-	return s.cache
+func (s *seeker[T]) GetCache() *map[int]T {
+	return &s.cache
 }
 
 func (s *seeker[T]) GetOffset() int {
@@ -74,7 +76,15 @@ func (s *seeker[T]) Clear() {
 }
 
 func (s *seeker[T]) SetLimit(limit int) {
+	if limit < 1 || limit > 100 {
+		limit = 10 // default
+	}
 	s.limit = limit
+}
+
+// IsBuffered becomes true once all the data fetched atleast once
+func (s *seeker[T]) IsBuffered() bool {
+	return s.isBuffered
 }
 
 // Next fetches and loads the next possible data from the API
@@ -84,7 +94,11 @@ func (s *seeker[T]) Next() (T, error) {
 		return data, err
 	}
 
-	// If data is empty, then += 0 anyway
+	// Marks data has buffered atleast once
+	if len(data) < 1 {
+		s.isBuffered = true
+	}
+
 	s.offset += len(data) // Seek to the data end
 	return data, err
 }

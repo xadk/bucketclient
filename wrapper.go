@@ -410,24 +410,24 @@ func (db *BucketDB) UploadObjectContent(bucketQuery, objQuery string, contentTyp
 	return err
 }
 
-func (db *BucketDB) FetchMyObjectContent(bucketQuery, objQuery string) (io.Reader, error) {
+func (db *BucketDB) FetchMyObjectContent(bucketQuery, objQuery string) (io.Reader, string, error) {
 	// Session checks
 	if !db.IsValidSession() {
 		if err := db.UpdateSession(); err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 	// Fetching via public API with my username
 	return db.FetchPublicObjectContent(db.username, bucketQuery, objQuery)
 }
 
-func (db *BucketDB) FetchPublicObjectContent(userQuery, bucketQuery, objQuery string) (io.Reader, error) {
+func (db *BucketDB) FetchPublicObjectContent(userQuery, bucketQuery, objQuery string) (io.Reader, string, error) {
 	client := &http.Client{}
 
 	// Request
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/objects/%s/%s/%s/content", db.host, userQuery, bucketQuery, objQuery), nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// Headers
@@ -438,10 +438,10 @@ func (db *BucketDB) FetchPublicObjectContent(userQuery, bucketQuery, objQuery st
 	// Response
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return resp.Body, nil
+	return resp.Body, resp.Header.Get("Content-Type"), nil
 }
 
 /**
